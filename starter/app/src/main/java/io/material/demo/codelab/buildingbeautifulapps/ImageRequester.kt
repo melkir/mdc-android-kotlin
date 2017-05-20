@@ -28,12 +28,11 @@ import com.android.volley.toolbox.Volley
  * Singleton class that handles image requests using Volley.
  */
 class ImageRequester private constructor(context: Context) {
-    private val requestQueue: RequestQueue
+    private val requestQueue: RequestQueue = Volley.newRequestQueue(context.applicationContext)
     private val imageLoader: ImageLoader
     private val maxByteSize: Int
 
     init {
-        this.requestQueue = Volley.newRequestQueue(context.applicationContext)
         this.requestQueue.start()
         this.maxByteSize = calculateMaxByteSize(context)
         this.imageLoader = ImageLoader(

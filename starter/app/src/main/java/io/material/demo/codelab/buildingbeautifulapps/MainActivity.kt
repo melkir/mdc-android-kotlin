@@ -18,6 +18,7 @@ package io.material.demo.codelab.buildingbeautifulapps
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -47,10 +48,29 @@ class MainActivity : AppCompatActivity() {
         val products = readProductsList()
         val imageRequester = ImageRequester.getInstance(this)
 
+        val headerProduct = getHeaderProduct(products)
+        imageRequester.setImageFromUrl(app_bar_image, headerProduct.url)
+
         product_list.setHasFixedSize(true)
-        product_list.layoutManager = LinearLayoutManager(this)
+        product_list.layoutManager = GridLayoutManager(this, resources.getInteger(R.integer.shr_column_count))
         adapter = ProductAdapter(products, imageRequester)
         product_list.adapter = adapter
+
+        bottom_navigation.setOnNavigationItemReselectedListener {
+            val layoutManager = product_list.layoutManager as LinearLayoutManager
+            layoutManager.scrollToPositionWithOffset(0, 0)
+        }
+
+        if (savedInstanceState == null)
+            bottom_navigation.selectedItemId = R.id.category_home
+    }
+
+    private fun getHeaderProduct(products: List<ProductEntry>): ProductEntry {
+        if (products.isEmpty()) throw IllegalArgumentException("There must be at least one product")
+
+        return products.indices.firstOrNull { "Perfect Goldfish Bowl" == products[it].title }
+                ?.let { products[it] }
+                ?: products[0]
     }
 
     private fun readProductsList(): ArrayList<ProductEntry> {
@@ -108,6 +128,12 @@ class MainActivity : AppCompatActivity() {
             imageRequester.setImageFromUrl(imageView, product.url)
             priceView.text = product.price
         }
+    }
+
+    private fun shuffleProduct() {
+        val products = readProductsList()
+        Collections.shuffle(products)
+        adapter?.setProducts(products)
     }
 
     companion object {
